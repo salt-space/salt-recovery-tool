@@ -58,6 +58,24 @@ listed under [Prerequisites](#prerequisites). The CLI and GUI use the same binar
 GitHub Releases is the distribution channel for this repository; it does not
 publish an npm package, container image, IPFS build or browser recovery app.
 
+## Video walkthroughs (v0.2.3)
+
+These narrated demonstrations use synthetic keys and simulated recovery records.
+Both videos include English subtitles.
+
+### Option 1: Proposer EOA private keys
+
+Recover a Salt account using proposer EOA private keys you already hold.
+
+https://github.com/user-attachments/assets/ca040489-d78e-4ffb-8ca1-423c6e3b614b
+
+### Option 2: Robo Guardian secret
+
+Derive the Robo Guardian keys from your secret, then recover the Salt account
+using those keys together with your proposer EOA private key.
+
+https://github.com/user-attachments/assets/808f1b03-b020-4b73-a55f-2fdba4aa0f86
+
 ## Two ways to run this
 
 | | GUI | Headless CLI (same binary) |
