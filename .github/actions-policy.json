@@ -1,0 +1,17 @@
+{
+  "name": "Maintainer builds only; no PR-triggered CI",
+  "enforcement": "active",
+  "conditions": {},
+  "rules": [
+    {
+      "type": "restrict_action_events",
+      "parameters": {
+        "allowed_events": [
+          "push",
+          "workflow_dispatch",
+          "workflow_call"
+        ]
+      }
+    }
+  ]
+}

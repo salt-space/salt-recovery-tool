@@ -1,0 +1,123 @@
+name: Release
+
+# Manual: Actions → Release → Run workflow (on main). Builds every platform,
+# then creates the GitHub release vX.Y.Z with notes from CHANGELOG.md.
+on:
+  workflow_dispatch:
+    inputs:
+      draft:
+        description: Create a draft release (publish it by hand after checking; the tag is created on publish)
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.repository == 'salt-space/salt-recovery-tool' && github.event_name == 'workflow_dispatch'
+    name: Check version and changelog
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.info.outputs.version }}
+      tag: ${{ steps.info.outputs.tag }}
+    steps:
+      - name: Only release from main
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "::error::Run the release workflow on main, not ${GITHUB_REF#refs/heads/}"
+          exit 1
+
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Version, tag and release notes
+        id: info
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(bash .github/scripts/release-info.sh version)
+          tag="v$version"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+            echo "::error::Tag $tag already exists. Bump the version (package.json, Cargo.toml, src-tauri/tauri.conf.json) and add a CHANGELOG.md section first."
+            exit 1
+          fi
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "::error::GitHub release $tag already exists (possibly as a draft). Publish or delete it, or bump the version."
+            exit 1
+          fi
+          bash .github/scripts/release-info.sh notes "$version" > release-notes.md
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Release $tag"
+            echo
+            cat release-notes.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    name: Build
+    needs: prepare
+    uses: ./.github/workflows/build.yml
+    permissions:
+      contents: read
+
+  release:
+    name: Create GitHub release
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      TAG: ${{ needs.prepare.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: salt-recovery-tool-*
+          path: dist
+
+      - name: Name assets and write checksums
+        run: |
+          mkdir -p release
+          for dir in dist/salt-recovery-tool-*/; do
+            target=$(basename "$dir")
+            target=${target#salt-recovery-tool-}
+            for file in "$dir"*; do
+              name=$(basename "$file")
+              # The bare binaries share one name across platforms.
+              case "$name" in
+                salt-recovery-tool) name="salt-recovery-tool-$target" ;;
+                salt-recovery-tool.exe) name="salt-recovery-tool-$target.exe" ;;
+              esac
+              cp "$file" "release/$name"
+            done
+          done
+          zip -r release/THIRD_PARTY_LICENSES.zip LICENSE THIRD_PARTY_NOTICES.md licenses/
+          (cd release && sha256sum * > SHA256SUMS.txt)
+          ls -la release
+          cat release/SHA256SUMS.txt
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash .github/scripts/release-info.sh notes "$VERSION" > release-notes.md
+          extra=()
+          if [ "${{ inputs.draft }}" = "true" ]; then
+            extra+=(--draft)
+          fi
+          gh release create "$TAG" release/* \
+            --target "$GITHUB_SHA" \
+            --title "Salt Recovery Tool $TAG" \
+            --notes-file release-notes.md \
+            "${extra[@]}"

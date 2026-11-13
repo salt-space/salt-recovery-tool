@@ -1,0 +1,43 @@
+[package]
+name = "salt-recovery-core"
+description = "Salt MPC disaster recovery: fetch encrypted shards, decrypt them, reconstruct keys"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+zeroize.workspace = true
+
+# Chain access: raw JSON-RPC over HTTPS + ABI coding. No provider stack.
+alloy-primitives = { version = "1", features = ["serde"] }
+alloy-sol-types = "1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+futures-util = "0.3"
+
+# Shard decryption: ECIES (interoperable with eciesjs defaults), HKDF-SHA256,
+# AES-256-GCM, gzip.
+ecies = { version = "0.2", default-features = false, features = ["std", "pure"] }
+hkdf = "0.12"
+sha2 = "0.10"
+aes-gcm = "0.10"
+flate2 = "1"
+base64 = "0.22"
+hex = "0.4"
+
+# Key reconstruction (same pinned revision as the original tool).
+k256 = { version = "0.13.4", default-features = false, features = ["arithmetic", "std"] }
+sl-dkls23 = { git = "https://github.com/silence-laboratories/dkls23", rev = "20f748e0681666a7032358dd5ba3336185260e7e" }
+sl-mpc-mate = "=1.0.0-beta"
+derivation-path = "0.2.0"
+
+# BIP39 / BIP32 for MetaMask-compatible Robo Guardian EOA derivation (m/44'/60'/0'/0/i).
+coins-bip32 = "0.8"
+coins-bip39 = "0.8"
+
+[dev-dependencies]
+tokio.workspace = true

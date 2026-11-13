@@ -1,0 +1,8 @@
+{
+  "description": "Desktop and CLI disaster recovery for Salt MPC accounts. Recover locally without Salt servers.",
+  "homepage": "https://github.com/salt-space/salt-recovery-tool/releases",
+  "has_wiki": false,
+  "has_projects": false,
+  "has_discussions": false,
+  "has_issues": true
+}

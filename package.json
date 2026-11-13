@@ -1,0 +1,51 @@
+{
+  "name": "salt-recovery-tool",
+  "version": "0.2.3",
+  "description": "Salt MPC disaster recovery desktop tool",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "hmr": "vite --port 5173",
+    "build": "tauri build",
+    "build:macos-universal": "tauri build --target universal-apple-darwin",
+    "build:web": "vite build",
+    "fetch-encrypted-shards": "node scripts/dev.mjs fetch",
+    "decrypt-shards": "node scripts/dev.mjs decrypt",
+    "reconstruct-private-keys": "node scripts/dev.mjs reconstruct",
+    "derive-robo": "node scripts/dev.mjs robo",
+    "tauri": "tauri",
+    "typecheck": "tsc --noEmit",
+    "test": "cargo test -p salt-recovery-core -p salt-recovery-tool"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^3.34.0",
+    "@emotion/react": "^11.14.0",
+    "@tauri-apps/api": "^2",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-icons": "^5.6.0",
+    "viem": "^2.52.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "@types/node": "^24.1.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.2.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/salt-space/salt-recovery-tool.git"
+  },
+  "homepage": "https://github.com/salt-space/salt-recovery-tool/releases",
+  "bugs": {
+    "url": "https://github.com/salt-space/salt-recovery-tool/issues"
+  }
+}
