@@ -84,10 +84,28 @@ packages: npm is private, Cargo publishing is disabled, and workflows have no
 package publication steps or package-write permission. Leave GitHub Pages
 disabled; no website deployment is needed for the app.
 
-Protect `main` against deletion and force pushes. Maintainers must review
-workflow changes before merging; do not require PR CI checks that this policy
-intentionally prevents. The release job alone receives `contents: write` so it
-can create a draft and attach release files.
+Protect `main` using [main-branch-ruleset.json](../.github/main-branch-ruleset.json).
+This active branch ruleset blocks deletion and force pushes, with no bypass
+actors. Normal fast-forward pushes by authorized maintainers remain allowed.
+It does not require PR approvals or status checks; the Actions event policy
+separately blocks PR-triggered workflows.
+
+Create the branch ruleset once with administrator credentials:
+
+```bash
+gh api --method POST \
+  -H 'X-GitHub-Api-Version: 2026-03-10' \
+  repos/salt-space/salt-recovery-tool/rulesets \
+  --input .github/main-branch-ruleset.json
+```
+
+If `Protect main` already exists, edit that ruleset instead of creating another.
+Verify it under **Settings → Rules → Rulesets** and check the effective branch
+rules with `gh api repos/salt-space/salt-recovery-tool/rules/branches/main`.
+The response should contain `deletion` and `non_fast_forward` rules.
+
+Maintainers must review workflow changes before merging. The release job alone
+receives `contents: write` so it can create a draft and attach release files.
 
 The target repository was already public when this checkout was prepared. Check
 visibility before the first push: pushing to a public repository publishes the
