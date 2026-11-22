@@ -285,8 +285,8 @@ publish a GitHub Release.
 
 ## Headless CLI
 
-See the [CLI reference (PDF)](docs/salt-recovery-tool-cli-reference.pdf)
-for command syntax and recovery examples.
+Command syntax and recovery examples are in the CLI reference (PDF:
+[`docs/salt-recovery-tool-cli-reference.pdf`](docs/salt-recovery-tool-cli-reference.pdf)).
 
 The CLI needs Rust and, on Linux, the system packages from
 [Prerequisites](#prerequisites). It doesn't need a display, and Node.js is only
